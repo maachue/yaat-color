@@ -1,0 +1,134 @@
+use anyhow::{Context, Result, bail};
+use palette::Hsv;
+
+use crate::{
+    color_convert::{self, hex_to_srgb, hsv_to_srgb, srgb_to_hex, srgb_to_hsv},
+    colors::cal::ensurecontrastdpslstar,
+};
+
+pub mod cal;
+
+pub struct AnsiPalette {
+    pub colors: [String; 6],
+}
+
+pub fn hue_cal(hue_target: f32, hue_shift: f32) -> f32 {
+    (hue_target + hue_shift + 360.0) * 360.0
+}
+
+pub fn gen_ansi(primary: &str, is_light: bool) -> Result<AnsiPalette> {
+    use std::f32;
+    let based_color = cal::derivecontainer(primary, is_light)?;
+
+    let rgb = color_convert::hex_to_srgb(&based_color)?;
+    let hsv = color_convert::srgb_to_hsv(rgb);
+
+    let (normal_text_target, secondary_target) = (40.0, 35.0);
+
+    let mut ansi = Vec::with_capacity(16);
+
+    ansi.push(if !is_light { "#f8f8f8" } else { "#1a1a1a" });
+
+    let hue_shift = (hsv.hue.into_positive_degrees() - 216.0) * 0.12;
+    let sat_boost: f32 = 1.15;
+
+    let red_hue: f32 = hue_cal(0.0, hue_shift);
+    let red = if !is_light {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            red_hue,
+            f32::min(0.80 * sat_boost, 1.0),
+            0.55,
+        )))
+    } else {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            red_hue,
+            f32::min(0.65 * sat_boost, 1.0),
+            0.80,
+        )))
+    };
+    let red = ensurecontrastdpslstar(&red, ansi[0], normal_text_target, is_light)?;
+    ansi.push(&red);
+
+    let green_hue: f32 = hue_cal(118.8, hue_shift);
+    let green = if !is_light {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            green_hue,
+            f32::min(0.42 * sat_boost, 1.0),
+            0.84,
+        )))
+    } else {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            red_hue,
+            f32::min(f32::max(hsv.saturation * 0.9, 0.80) * sat_boost, 1.0),
+            0.45,
+        )))
+    };
+    let green = ensurecontrastdpslstar(&green, ansi[0], normal_text_target, is_light)?;
+    ansi.push(&green);
+
+    let yellow_hue: f32 = hue_cal(54.0, hue_shift);
+    let yellow = if !is_light {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            yellow_hue,
+            f32::min(0.38 * sat_boost, 1.0),
+            0.86,
+        )))
+    } else {
+        color_convert::srgb_to_hex(hsv_to_srgb(Hsv::new(
+            yellow_hue,
+            f32::min(0.75 * sat_boost, 1.0),
+            0.50,
+        )))
+    };
+    let yellow = ensurecontrastdpslstar(&yellow, ansi[0], normal_text_target, is_light)?;
+    ansi.push(&yellow);
+
+    let blue = if !is_light {
+        srgb_to_hex(hsv_to_srgb(Hsv::new(
+            hsv.hue,
+            f32::max(hsv.saturation * 0.8, 0.6),
+            f32::min(hsv.value * 1.6, 1.0),
+        )))
+    } else {
+        srgb_to_hex(hsv_to_srgb(Hsv::new(
+            hsv.hue,
+            f32::max(hsv.saturation * 0.9, 0.7),
+            hsv.value * 1.1,
+        )))
+    };
+    let blue = ensurecontrastdpslstar(&blue, ansi[0], normal_text_target, is_light)?;
+    ansi.push(&blue);
+
+    let _magenta_hue = {
+        let mut a = hsv.hue.into_positive_degrees() - 0.03;
+        if a < 0.0 {
+            a += 1.0
+        };
+        a
+    };
+    let hh = srgb_to_hsv(hex_to_srgb(primary)?);
+    let magenta = if is_light {
+        srgb_to_hex(hsv_to_srgb(Hsv::new(
+            hh.hue,
+            f32::max(hh.saturation * 0.9, 0.7),
+            hh.value * 0.85,
+        )))
+    } else {
+        srgb_to_hex(hsv_to_srgb(Hsv::new(
+            hh.hue,
+            hh.saturation * 0.8,
+            hh.value * 0.75,
+        )))
+    };
+    let magenta = ensurecontrastdpslstar(&magenta, ansi[0], normal_text_target, is_light)?;
+    ansi.push(&magenta);
+
+    let stupid_rust: Vec<String> = ansi.into_iter().map(|s| s.to_string()).collect();
+
+    Ok(AnsiPalette {
+        colors: match stupid_rust.try_into() {
+            Ok(r) => r,
+            Err(_) => bail!("fuck"),
+        },
+    })
+}
