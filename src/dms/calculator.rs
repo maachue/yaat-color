@@ -1,14 +1,16 @@
-use palette::Hsv;
+use palette::{Hsv, RgbHue, Srgb};
 use std::f32;
+use crate::colors::convert::{ColorExt, FromHexToSrgbf32};
+use anyhow::Result;
 
 /// Hue Calculator
 pub struct HueWheel {
-    pub red: f32,
-    pub green: f32,
-    pub yellow: f32,
-    pub blue: f32,
-    pub magenta: f32,
-    pub cyan: f32,
+    pub red: RgbHue,
+    pub green: RgbHue,
+    pub yellow: RgbHue,
+    pub blue: RgbHue,
+    pub magenta: RgbHue,
+    pub cyan: RgbHue,
 }
 /// Hue Calculator
 impl HueWheel {
@@ -17,12 +19,12 @@ impl HueWheel {
         let shift = (base - 216.0) * 0.12;
 
         Self {
-            red: (0.0 + shift + 360.0) % 360.0,
-            green: (118.8 + shift + 360.0) % 360.0,
-            yellow: (54.0 + shift + 360.0) % 360.0,
-            blue: base,
-            magenta: color.hue.into_positive_degrees(),
-            cyan: color.hue.into_positive_degrees(),
+            red: RgbHue::from_degrees((0.0 + shift + 360.0).rem_euclid(360.0)),
+            green: RgbHue::from_degrees((118.8 + shift + 360.0).rem_euclid(360.0)),
+            yellow: RgbHue::from_degrees((54.0 + shift + 360.0).rem_euclid(360.0)),
+            blue: RgbHue::from_degrees(base),
+            magenta: color.hue,
+            cyan: color.hue,
         }
     }
 }
@@ -50,5 +52,30 @@ impl AnsiSV {
             magenta: (color.saturation * 0.8, color.value * 0.75),
             cyan: (color.saturation, color.value),
         }
+    }
+}
+
+pub struct AnsiNormalHSV {
+    pub color: [Hsv; 7],
+}
+
+impl AnsiNormalHSV {
+    pub fn get(color: &Hsv, container: &Hsv) -> Result<Self> {
+        let sat_val = AnsiSV::from_color(color, container);
+        let hues = HueWheel::from_color(color, container);
+
+        let ansi = [
+            Srgb::from_hex("#1a1a1a")?.to_hsv(),
+            Hsv::new(hues.red, sat_val.red.0, sat_val.red.1),
+            Hsv::new(hues.green, sat_val.green.0, sat_val.green.1),
+            Hsv::new(hues.yellow, sat_val.yellow.0, sat_val.yellow.1),
+            Hsv::new(hues.blue, sat_val.blue.0, sat_val.blue.1),
+            Hsv::new(hues.magenta, sat_val.magenta.0, sat_val.magenta.1),
+            Hsv::new(hues.cyan, sat_val.cyan.0, sat_val.cyan.1),
+        ];
+
+        Ok(Self {
+            color: ansi,
+        })
     }
 }

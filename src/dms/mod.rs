@@ -1,8 +1,8 @@
 use crate::{
-    colors::convert::{ColorExt, FromHexToSrgbf32},
-    dms::calculator::{AnsiSV, HueWheel},
+    colors::convert::{ColorExt, FromHexToSrgbf32, ToSrgb},
+    dms::calculator::{AnsiNormalHSV},
 };
-use anyhow::Result;
+use anyhow::{Result};
 use palette::{Hsv, Srgb};
 
 mod balance_contrast;
@@ -16,29 +16,29 @@ pub enum BalanceContrastBackEnd {
 
 /// THE RESULT ONLY
 /// Type: HSV
-pub struct AnsiNorColor {
-    black: Hsv,
-    red: Hsv,
-    green: Hsv,
-    yellow: Hsv,
-    blue: Hsv,
-    magenta: Hsv,
-    cyan: Hsv,
+pub struct AnsiNormalColor {
+    black: Srgb<f32>,
+    red: Srgb<f32>,
+    green: Srgb<f32>,
+    yellow: Srgb<f32>,
+    blue: Srgb<f32>,
+    magenta: Srgb<f32>,
+    cyan: Srgb<f32>,
 }
 
-impl AnsiNorColor {
-    pub fn new(hues: HueWheel, sat_val: AnsiSV) -> Result<Self> {
+impl AnsiNormalColor {
+    pub fn new(hsvs: &[Hsv; 7]) -> Result<Self> {
         Ok(Self {
-            black: Srgb::from_hex("#1a1a1a")?.to_hsv(),
-            red: Hsv::new(hues.red, sat_val.red.0, sat_val.red.1),
-            green: Hsv::new(hues.green, sat_val.green.0, sat_val.green.1),
-            yellow: Hsv::new(hues.yellow, sat_val.yellow.0, sat_val.yellow.1),
-            blue: Hsv::new(hues.blue, sat_val.blue.0, sat_val.blue.1),
-            magenta: Hsv::new(hues.magenta, sat_val.magenta.0, sat_val.magenta.1),
-            cyan: Hsv::new(hues.cyan, sat_val.cyan.0, sat_val.cyan.1),
+            black: hsvs[0].to_srgb(),
+            red: hsvs[1].to_srgb(),
+            green: hsvs[2].to_srgb(),
+            yellow: hsvs[3].to_srgb(),
+            blue: hsvs[4].to_srgb(),
+            magenta: hsvs[5].to_srgb(),
+            cyan: hsvs[6].to_srgb(),
         })
     }
-    pub fn iter(&self) -> impl Iterator<Item = &Hsv> {
+    pub fn iter(&self) -> impl Iterator<Item = &Srgb<f32>> {
         [
             &self.black,
             &self.red,
@@ -66,90 +66,22 @@ pub fn generate_ansi(primary: &str) -> Result<()> {
 
     const NORMAL_TEXT_TARGET: f32 = 40.0;
 
-    let ansi = AnsiNorColor::new(
-        super::dms::HueWheel::from_color(&hsv, &based),
-        super::dms::AnsiSV::from_color(&hsv, &based),
+    let ansi = AnsiNormalHSV::get(
+        &hsv,
+        &based,
     )?;
 
-    let mut new = Vec::with_capacity(8);
-    new.push(ansi.black);
-    for color in ansi.iter().skip(1) {
-        new.push(balance_contrast::balance_contrast_dps_l_star(
-            color,
-            &ansi.black,
-            NORMAL_TEXT_TARGET,
-            false,
-        ))
+    let mut new = Vec::with_capacity(7);
+    new.push(ansi.color[0]);
+    for color in ansi.color.iter().skip(1) {
+        new.push(balance_contrast::balance_contrast_dps_l_star(color, &ansi.color[0], NORMAL_TEXT_TARGET, false));
     }
 
-    for (i, color) in new.iter().enumerate() {
-        println!("{} = {}", i, color.to_hex())
+    let newa: [Hsv; 7] = new.try_into().expect("fdas");
+    let ansi = AnsiNormalColor::new(&newa)?;
+    for (i, ansi) in ansi.iter().enumerate() {
+        println!("{} = \"{}\"", i, ansi.to_hex())
     }
-
-    Ok(())
-}
-
-#[cfg(test)]
-#[allow(unused_variables, dead_code)]
-pub fn generate_ansi_palette(primary: &str) -> Result<()> {
-    let hsv = Srgb::from_hex(primary)?.to_hsv();
-    let based = derive_container(&hsv);
-    let primary_hue = hsv.hue.into_positive_degrees();
-    let hue_shift = (primary_hue - 216.0) * 0.12;
-
-    const SAT_BOOST: f32 = 1.15;
-    const NORMAL_TEXT_TARGET: f32 = 40.0; // dark mode only
-    const SECONDARY_TARGET: f32 = 35.0;
-
-    let mut ansi = Vec::with_capacity(16);
-
-    let bg = "#1a1a1a";
-    ansi.push(bg);
-
-    let red_hue = (0.0 + hue_shift + 360.0) % 360.0;
-    let green_hue = (118.8 + hue_shift + 360.0) % 360.0;
-    let yellow_hue = (54.0 + hue_shift + 360.0) % 360.0;
-    let blue_hue = based.hue.into_positive_degrees();
-    let magenta_hue = if based.hue.into_positive_degrees() - 10.8 < 0 as f32 {
-        based.hue.into_positive_degrees() - 10.8 + 360.0
-    } else {
-        based.hue.into_positive_degrees() - 10.8
-    };
-    let cyan_hue = if based.hue.into_positive_degrees() + 28.8 > 360.0 {
-        based.hue.into_positive_degrees() + 28.8 - 360.0
-    } else {
-        based.hue.into_positive_degrees() + 28.8
-    };
-
-    let hues = (
-        red_hue,
-        green_hue,
-        yellow_hue,
-        blue_hue,
-        based.hue.into_positive_degrees(), // weird
-        hsv.value,
-    );
-    // idk what i coding
-
-    let saturation = (
-        f32::min(0.65 * SAT_BOOST, 1.0),
-        f32::min(0.42 * SAT_BOOST, 1.0),
-        f32::min(0.38 * SAT_BOOST, 1.0),
-        f32::max(based.saturation * 0.9, 0.7),
-        based.saturation * 0.8,
-        hsv.saturation,
-    );
-
-    let value = (
-        0.80,
-        0.84,
-        0.86,
-        f32::min(based.value * 1.6, 1.0),
-        hsv.value * 0.75,
-        hsv.value,
-    );
-
-    println!("{:?} {:?} {:?}", hues, saturation, value);
 
     Ok(())
 }
