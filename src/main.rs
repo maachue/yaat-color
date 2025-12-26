@@ -15,7 +15,11 @@ fn main() -> Result<()> {
         Mode::Light => true,
     };
 
-    dms::generate_ansi(&cmd.color)?;
+    let color = dms::generate_ansi(&cmd.color)?;
+
+    for (index, color) in color.normal.iter().chain(color.bright.iter()).enumerate() {
+        println!("{} = {}", index, color)
+    }
 
     Ok(())
 }
