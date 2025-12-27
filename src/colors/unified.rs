@@ -2,6 +2,7 @@
  * THIS FILE IS UNITED THE ANSI PALETTE FROM SPECIAL BACKEND GENERATE.
 */
 
+use indexmap::IndexMap;
 use palette::Hsv;
 
 #[repr(u8)]
@@ -38,6 +39,14 @@ impl<T: Clone> AnsiPalette<T> {
         let bright = BasedAnsi(array::from_fn(|i| colors[i + 8].clone()));
 
         Self { normal, bright }
+    }
+    pub fn read_as_indexmap(&self) -> IndexMap<u8, &T> {
+        self.normal
+            .iter()
+            .chain(self.bright.iter())
+            .enumerate()
+            .map(|(i, c)| (i as u8, c))
+            .collect()
     }
 }
 

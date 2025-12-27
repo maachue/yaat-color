@@ -8,6 +8,9 @@ pub struct Cli {
     #[arg(long)]
     pub from_srgb: bool,
 
+    #[arg(long)]
+    pub json_dump: bool,
+
     #[arg(long, default_value = "dms")]
     pub backend: BackEnd,
 

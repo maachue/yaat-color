@@ -7,6 +7,7 @@ use crate::{cli::Mode, colors::convert::FromHexToSrgbf32, utils::WARNING_MSG};
 
 mod cli;
 mod colors;
+mod display;
 mod dms;
 mod utils;
 
@@ -42,8 +43,13 @@ fn main() -> Result<()> {
         }
     };
 
-    for (index, color) in color.normal.iter().chain(color.bright.iter()).enumerate() {
-        println!("{} = {}", index, color)
+    match cmd.json_dump {
+        true => display::json_dump(&color)?,
+        false => {
+            for (index, color) in color.normal.iter().chain(color.bright.iter()).enumerate() {
+                println!("{} = \"{}\"", index, color)
+            }
+        }
     }
 
     Ok(())
