@@ -67,9 +67,9 @@ fn main() -> Result<()> {
     if let Some(start) = start {
         let elapsed = start.elapsed();
         eprintln!(
-            "{} calculate in {}s",
+            "{} calculate in {}",
             DOING_WORK_MSG.style("    Finished"),
-            elapsed.as_secs_f64(),
+            utils::format_duration(elapsed),
         );
     }
 
