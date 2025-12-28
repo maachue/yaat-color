@@ -27,7 +27,7 @@ pub trait ColorExt: ToSrgb {
 
     fn to_owo(&self) -> owo_colors::Rgb {
         let rgb: Srgb<u8> = self.to_srgb().into_format();
-        owo_colors::Rgb(rgb.red, rgb.green, rgb.green)
+        owo_colors::Rgb(rgb.red, rgb.green, rgb.blue)
     }
 
     // fn to_oklch(&self) -> Oklch {
