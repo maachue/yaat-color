@@ -8,8 +8,13 @@ pub struct Cli {
     #[arg(long)]
     pub from_srgb: bool,
 
+    /// Dump json simplified
     #[arg(long)]
     pub json_dump: bool,
+
+    /// Dump
+    #[arg(long, default_value = "human-readable")]
+    pub dump: DumpMode,
 
     #[arg(long)]
     pub verbose: bool,
@@ -34,6 +39,13 @@ impl std::fmt::Display for BackEnd {
             BackEnd::DmsWcag => write!(f, "DMS-WCAG"),
         }
     }
+}
+
+#[derive(ValueEnum, Clone, Copy, Debug)]
+pub enum DumpMode {
+    HumanReadable,
+    JsonSimplified,
+    JsonPretty,
 }
 
 #[derive(ValueEnum, Clone, Copy, Debug)]

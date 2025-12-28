@@ -4,6 +4,7 @@
 
 use indexmap::IndexMap;
 use palette::Hsv;
+use serde::Serialize;
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
@@ -48,6 +49,28 @@ impl<T: Clone> AnsiPalette<T> {
             .map(|(i, c)| (i as u8, c))
             .collect()
     }
+    pub fn read_as_viewer_json_struct(&self) -> ViewerAsIndexMapAnsiPalette<'_, T> {
+        let normal = self
+            .normal
+            .iter()
+            .enumerate()
+            .map(|(i, c)| (i.to_string(), c))
+            .collect();
+        let bright = self
+            .bright
+            .iter()
+            .enumerate()
+            .map(|(i, c)| (i.to_string(), c))
+            .collect();
+
+        ViewerAsIndexMapAnsiPalette { normal, bright }
+    }
+}
+
+#[derive(Serialize)]
+pub struct ViewerAsIndexMapAnsiPalette<'a, T> {
+    pub normal: IndexMap<String, &'a T>,
+    pub bright: IndexMap<String, &'a T>,
 }
 
 pub type AnsiPaletteHex = AnsiPalette<String>;

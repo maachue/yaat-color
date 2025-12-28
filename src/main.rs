@@ -6,7 +6,7 @@ use owo_colors::OwoColorize;
 use palette::Srgb;
 
 use crate::{
-    cli::Mode,
+    cli::{DumpMode, Mode},
     colors::convert::FromHexToSrgbf32,
     utils::{DOING_WORK_MSG, ERR_MSG, WARN_MSG},
 };
@@ -77,13 +77,19 @@ fn main() -> Result<()> {
         );
     }
 
-    match cmd.json_dump {
-        true => display::json_dump(&colors)?,
-        false => {
+    if cmd.json_dump {
+        display::json_dump_simplified(&colors)?;
+        return Ok(());
+    }
+
+    match cmd.dump {
+        DumpMode::HumanReadable => {
             for (index, color) in colors.normal.iter().chain(colors.bright.iter()).enumerate() {
                 println!("{} = \"{}\"", index, color)
             }
         }
+        DumpMode::JsonSimplified => display::json_dump_simplified(&colors)?,
+        DumpMode::JsonPretty => display::json_dump_pretty(&colors)?,
     }
 
     Ok(())
