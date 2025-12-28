@@ -20,7 +20,11 @@ mod utils;
 mod dms;
 
 fn main() -> Result<()> {
-    let cmd = cli::Cli::parse();
+    let mut  cmd = cli::Cli::parse();
+
+    if cmd.json_dump {
+        cmd.dump = DumpMode::JsonSimplified;
+    }
 
     if cmd.verbose {
         eprintln!(
@@ -75,11 +79,6 @@ fn main() -> Result<()> {
             DOING_WORK_MSG.style("    Finished"),
             utils::format_duration(elapsed),
         );
-    }
-
-    if cmd.json_dump {
-        display::json_dump_simplified(&colors)?;
-        return Ok(());
     }
 
     match cmd.dump {

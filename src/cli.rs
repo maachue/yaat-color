@@ -9,7 +9,7 @@ pub struct Cli {
     pub from_srgb: bool,
 
     /// Dump json simplified
-    #[arg(long)]
+    #[arg(long, conflicts_with = "dump")]
     pub json_dump: bool,
 
     /// Dump
@@ -43,8 +43,25 @@ impl std::fmt::Display for BackEnd {
 
 #[derive(ValueEnum, Clone, Copy, Debug)]
 pub enum DumpMode {
+    #[value(
+        name = "HumanReadable",
+        alias = "human-readable",
+        alias = "human"
+    )]
     HumanReadable,
+
+    #[value(
+        name = "JsonSimplifed",
+        alias = "json-simplified",
+        alias = "json"
+    )]
     JsonSimplified,
+
+    #[value(
+        name = "JsonPretty",
+        alias = "json-pretty",
+        alias = "matugen"
+    )]
     JsonPretty,
 }
 
