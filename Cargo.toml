@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.100"
 clap = { version = "4.5.53", features = ["derive"] }
+crossterm = "0.29.0"
 indexmap = { version = "2.12.1", features = ["serde"] }
 owo-colors = "4.2.3"
 palette = { version = "0.7.6", features = ["serde"] }

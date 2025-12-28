@@ -16,3 +16,15 @@ pub fn format_duration(d: Duration) -> String {
         _ => format!("{}ns", d.as_nanos()),
     }
 }
+
+pub fn read_stdin() -> Option<String> {
+    use std::io::{self, Read, IsTerminal};
+
+    if ! io::stdin().is_terminal() {
+        let mut buf = String::new();
+        io::stdin().read_to_string(&mut buf).ok()?;
+        Some(buf)
+    } else {
+        None
+    }
+}

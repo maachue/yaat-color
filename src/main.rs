@@ -8,7 +8,7 @@ use palette::Srgb;
 use crate::{
     cli::{DumpMode, Mode},
     colors::convert::FromHexToSrgbf32,
-    utils::{DOING_WORK_MSG, ERR_MSG, WARN_MSG},
+    utils::{DOING_WORK_MSG, ERR_MSG, WARN_MSG, read_stdin},
 };
 
 mod colors;
@@ -24,6 +24,10 @@ fn main() -> Result<()> {
 
     if cmd.json_dump {
         cmd.dump = DumpMode::JsonSimplified;
+    }
+
+    if let Some(stdin) = read_stdin() {
+        cmd.color = stdin;
     }
 
     if cmd.verbose {
