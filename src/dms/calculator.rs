@@ -54,7 +54,7 @@ impl HueWheel {
         };
         let mut bright = normal;
         bright[AnsiIndex::Black as usize] = Srgb::from_hex("#5c6370")?.get_hue();
-        bright[AnsiIndex::Blue as usize] = retone_to_l(color, 85.0).hue; // wrong?
+        bright[AnsiIndex::Blue as usize] = retone_to_l(color, 85.0).hue;
         bright[AnsiIndex::Magenta as usize] = RgbHue::from_degrees(magh);
         bright[AnsiIndex::Cyan as usize] = RgbHue::from_degrees(bcyanh);
         bright[AnsiIndex::White as usize] = Srgb::from_hex("#ffffff")?.get_hue();
@@ -150,20 +150,12 @@ impl AnsiResult {
         let sat_val = AnsiSV::from_color(color, container)?;
         let hues = HueWheel::from_color(color, container)?;
 
-        let new_normal: [Hsv; 8] = {
-            let mut temp: Vec<Hsv> = Vec::with_capacity(8);
-            for (hue, sv) in hues.normal.iter().zip(sat_val.normal.iter()) {
-                temp.push(Hsv::new(*hue, sv.0, sv.1));
-            }
-            temp.try_into().expect("Err!")
-        };
-        let new_bright: [Hsv; 8] = {
-            let mut temp: Vec<Hsv> = Vec::with_capacity(8);
-            for (hue, sv) in hues.bright.iter().zip(sat_val.bright.iter()) {
-                temp.push(Hsv::new(*hue, sv.0, sv.1));
-            }
-            temp.try_into().expect("Err!")
-        };
+        let new_normal: [Hsv; 8] = std::array::from_fn(|i| {
+            Hsv::new(hues.normal[i], sat_val.normal[i].0, sat_val.normal[i].1)
+        });
+        let new_bright: [Hsv; 8] = std::array::from_fn(|i| {
+            Hsv::new(hues.bright[i], sat_val.bright[i].0, sat_val.bright[i].1)
+        });
 
         Ok(Self {
             normal: new_normal,
@@ -172,47 +164,17 @@ impl AnsiResult {
     }
     pub fn balance_dps_itself(&self, target_normal: f32, target_bright: f32) -> Self {
         let bg = self.normal[AnsiIndex::Black as usize];
-        let new_normal: [Hsv; 8] = {
-            let mut temp: Vec<Hsv> = Vec::with_capacity(8);
-            temp.push(self.normal[0]);
-            for color in self.normal.iter().skip(1) {
-                temp.push(balance_contrast_dps_l_star(
-                    color,
-                    &bg,
-                    target_normal,
-                    false,
-                ));
+        let new_normal: [Hsv; 8] = std::array::from_fn(|i| {
+            if i == AnsiIndex::Black as usize { return self.normal[i] }
+            balance_contrast_dps_l_star(&self.normal[i], &bg, target_normal, false)
+        });
+        let new_bright: [Hsv; 8] = std::array::from_fn(|i| {
+            match i {
+                0 => self.bright[0],
+                3 | 4 | 8 => self.bright[i],
+                _ => balance_contrast_dps_l_star(&self.bright[i], &bg, target_bright, false)
             }
-            temp.try_into().expect("Err!a1")
-        };
-        let new_bright: [Hsv; 8] = {
-            let mut temp: Vec<Hsv> = Vec::with_capacity(8);
-            temp.push(self.bright[0]);
-            for color in self.bright.iter().skip(1).take(8 - 1 - 5) {
-                temp.push(balance_contrast_dps_l_star(
-                    color,
-                    &bg,
-                    target_bright,
-                    false,
-                ));
-            }
-            temp.push(self.bright[11 - 8]);
-            temp.push(self.bright[12 - 8]);
-            temp.push(balance_contrast_dps_l_star(
-                &self.bright[13 - 8],
-                &bg,
-                target_bright,
-                false,
-            ));
-            temp.push(balance_contrast_dps_l_star(
-                &self.bright[14 - 8],
-                &bg,
-                target_bright,
-                false,
-            ));
-            temp.push(self.bright[15 - 8]);
-            temp.try_into().expect("Err!a2")
-        };
+        });
 
         Self {
             normal: new_normal,
@@ -220,28 +182,8 @@ impl AnsiResult {
         }
     }
     pub fn to_hex(&self) -> crate::colors::unified::AnsiPaletteHex {
-        let normal: [String; 8] = {
-            let mut temp = Vec::with_capacity(8);
-            for color in self.normal.iter() {
-                temp.push(color.to_hex());
-            }
-            temp.try_into().expect("Err!r")
-        };
-        let bright: [String; 8] = {
-            let mut temp = Vec::with_capacity(8);
-            for color in self.bright.iter() {
-                temp.push((*color).to_hex());
-            }
-            temp.try_into().expect("Err!r")
-        };
-
-        // let chained: [String; 16] = std::array::from_fn(|i| {
-        //     if i < 8 {
-        //         normal[i].clone()
-        //     } else {
-        //         bright[i - 8].clone()
-        //     }
-        // });
+        let normal: [String; 8] = self.normal.map(|c| c.to_hex());
+        let bright: [String; 8] = self.bright.map(|c| c.to_hex());
 
         crate::colors::unified::AnsiPaletteHex::from_array(&std::array::from_fn(|i| {
             if i < 8 {
