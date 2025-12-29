@@ -7,6 +7,7 @@ edition = "2024"
 anyhow = "1.0.100"
 clap = { version = "4.5.53", features = ["derive"] }
 crossterm = "0.29.0"
+dialoguer = { version = "0.12.0", optional = true }
 directories = { version = "6.0.0", optional = true }
 glob = "0.3.3"
 indexmap = { version = "2.12.1", features = ["serde"] }
@@ -17,5 +18,5 @@ serde_json = { version = "1.0.148", features = ["indexmap"] }
 
 [features]
 default = []
-seq_win = []
+seq_win = [ "dep:dialoguer" ]
 config = [ "dep:directories" ]
