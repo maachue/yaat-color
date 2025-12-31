@@ -6,7 +6,6 @@ use owo_colors::OwoColorize;
 use palette::Srgb;
 
 use crate::{
-    backend::BackendStrategy,
     cli::{DumpMode, Mode},
     colors::convert::FromHexToSrgbf32,
     utils::{DOING_WORK_MSG, ERR_MSG, WARN_MSG, read_stdin},
@@ -20,7 +19,7 @@ mod utils;
 
 mod term;
 
-mod backend;
+mod backends;
 
 fn main() -> Result<()> {
     let mut cmd = cli::Cli::parse();
@@ -80,11 +79,7 @@ fn main() -> Result<()> {
         ),
     };
 
-    let colors = match cmd.backend {
-        backend::BackendEnum::Dms => backend::Dms::generate(&color, cmd.balance)?,
-        #[allow(unreachable_patterns)]
-        _ => bail!("{}: `{}` backend is not supported", ERR_MSG, cmd.backend),
-    };
+    let colors = backends::generate(&color, &cmd.backend, &cmd.balance)?;
 
     if let Some(start) = start {
         let elapsed = start.elapsed();

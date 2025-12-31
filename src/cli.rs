@@ -1,6 +1,6 @@
 use clap::{Parser, ValueEnum};
 
-use crate::backend::{BackendEnum, BalanceContrast};
+use crate::backends::{BackendEnum, BalanceContrast};
 
 #[derive(Parser, Debug)]
 #[command(version, long_about = None)]

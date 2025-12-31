@@ -70,3 +70,4 @@ pub fn unix_term(ansi: &AnsiPaletteHex) -> Result<()> {
     }
     Ok(())
 }
+

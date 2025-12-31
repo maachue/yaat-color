@@ -1,10 +1,13 @@
 use std::{env, fs::File, io::Write, path::PathBuf};
 
-use serde::{Deserialize, Serialize};
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{colors::unified::{AnsiIndex, AnsiPaletteHex}, utils::ERR_MSG};
+use crate::{
+    colors::unified::{AnsiIndex, AnsiPaletteHex},
+    utils::ERR_MSG,
+};
 const SCHEME_NAME: &str = "yaat";
 
 /// return `stable`, `preview`, `unpkg`
@@ -14,9 +17,12 @@ fn get_winterm_dirs() -> Option<(PathBuf, PathBuf, PathBuf)> {
     if let Some(local_appdata) = local_appdata {
         let local_appdata = PathBuf::from(local_appdata);
         return Some((
-            local_appdata.join("Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"),
-            local_appdata.join("Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settings.json"),
-            local_appdata.join("Microsoft/WindowsTerminal/settings.json")
+            local_appdata
+                .join("Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"),
+            local_appdata.join(
+                "Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settings.json",
+            ),
+            local_appdata.join("Microsoft/WindowsTerminal/settings.json"),
         ));
     }
 
@@ -37,9 +43,13 @@ pub fn win_term(ansi: &AnsiPaletteHex) -> Result<()> {
         let mut setttings_json = match serde_json::from_str::<WinTerm>(&context) {
             Ok(o) => o,
             Err(e) => {
-                eprintln!("{w}: deserializing json failed {p}: {e}", p = i.display(), w = ERR_MSG);
+                eprintln!(
+                    "{w}: deserializing json failed {p}: {e}",
+                    p = i.display(),
+                    w = ERR_MSG
+                );
                 continue;
-            },
+            }
         };
 
         let mut found = false;
@@ -59,7 +69,11 @@ pub fn win_term(ansi: &AnsiPaletteHex) -> Result<()> {
         let new_json = match serde_json::to_string_pretty(&setttings_json) {
             Ok(o) => o,
             Err(e) => {
-                eprintln!("{}: writing json failed: {p}: {e}", ERR_MSG, p = i.display());
+                eprintln!(
+                    "{}: writing json failed: {p}: {e}",
+                    ERR_MSG,
+                    p = i.display()
+                );
                 continue;
             }
         };
@@ -117,27 +131,28 @@ struct WinScheme {
 impl From<&AnsiPaletteHex> for WinScheme {
     fn from(c: &AnsiPaletteHex) -> Self {
         Self {
-            name                : SCHEME_NAME.to_string(),
-            cursor_color        : "#FFFFFF" .to_string(),
+            name: SCHEME_NAME.to_string(),
+            cursor_color: "#FFFFFF".to_string(),
             selection_background: c.bright.get_ro(AnsiIndex::White as usize).to_string(),
-            foreground          : "#D3D7CF".to_string(),
-            background          : "#000000".to_string(),
-            black               : c.normal.get_ro(AnsiIndex::Black as usize).to_string(),
-            blue                : c.normal.get_ro(AnsiIndex::Blue as usize).to_string(),
-            cyan                : c.normal.get_ro(AnsiIndex::Cyan as usize).to_string(),
-            green               : c.normal.get_ro(AnsiIndex::Green as usize).to_string(),
-            purple              : c.normal.get_ro(AnsiIndex::Magenta as usize).to_string(),
-            red                 : c.normal.get_ro(AnsiIndex::Red as usize).to_string(),
-            white               : c.normal.get_ro(AnsiIndex::White as usize).to_string(),
-            yellow              : c.normal.get_ro(AnsiIndex::Yellow as usize).to_string(),
-            bright_black        : c.bright.get_ro(AnsiIndex::Black as usize).to_string(),
-            bright_blue         : c.bright.get_ro(AnsiIndex::Blue as usize).to_string(),
-            bright_cyan         : c.bright.get_ro(AnsiIndex::Cyan as usize).to_string(),
-            bright_green        : c.bright.get_ro(AnsiIndex::Green as usize).to_string(),
-            bright_purple       : c.bright.get_ro(AnsiIndex::Magenta as usize).to_string(),
-            bright_red          : c.bright.get_ro(AnsiIndex::Red as usize).to_string(),
-            bright_white        : c.bright.get_ro(AnsiIndex::White as usize).to_string(),
-            bright_yellow       : c.bright.get_ro(AnsiIndex::Yellow as usize).to_string(),
+            foreground: "#D3D7CF".to_string(),
+            background: "#000000".to_string(),
+            black: c.normal.get_ro(AnsiIndex::Black as usize).to_string(),
+            blue: c.normal.get_ro(AnsiIndex::Blue as usize).to_string(),
+            cyan: c.normal.get_ro(AnsiIndex::Cyan as usize).to_string(),
+            green: c.normal.get_ro(AnsiIndex::Green as usize).to_string(),
+            purple: c.normal.get_ro(AnsiIndex::Magenta as usize).to_string(),
+            red: c.normal.get_ro(AnsiIndex::Red as usize).to_string(),
+            white: c.normal.get_ro(AnsiIndex::White as usize).to_string(),
+            yellow: c.normal.get_ro(AnsiIndex::Yellow as usize).to_string(),
+            bright_black: c.bright.get_ro(AnsiIndex::Black as usize).to_string(),
+            bright_blue: c.bright.get_ro(AnsiIndex::Blue as usize).to_string(),
+            bright_cyan: c.bright.get_ro(AnsiIndex::Cyan as usize).to_string(),
+            bright_green: c.bright.get_ro(AnsiIndex::Green as usize).to_string(),
+            bright_purple: c.bright.get_ro(AnsiIndex::Magenta as usize).to_string(),
+            bright_red: c.bright.get_ro(AnsiIndex::Red as usize).to_string(),
+            bright_white: c.bright.get_ro(AnsiIndex::White as usize).to_string(),
+            bright_yellow: c.bright.get_ro(AnsiIndex::Yellow as usize).to_string(),
         }
     }
 }
+

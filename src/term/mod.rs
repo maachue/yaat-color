@@ -22,3 +22,4 @@ pub fn apply(ansi: &AnsiPaletteHex) -> Result<()> {
 
     Ok(())
 }
+

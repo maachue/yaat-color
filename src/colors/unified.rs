@@ -39,7 +39,7 @@ impl<T> BasedAnsi<T> {
 use std::{array, ops::Index};
 
 impl<T: Clone> AnsiPalette<T> {
-    pub fn from_array(colors: &[T; 16]) -> Self {
+    pub fn from_array(colors: [T; 16]) -> Self {
         let normal = BasedAnsi(array::from_fn(|i| colors[i].clone()));
         let bright = BasedAnsi(array::from_fn(|i| colors[i + 8].clone()));
 
