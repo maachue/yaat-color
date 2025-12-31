@@ -49,7 +49,7 @@ pub fn get_hues(color: &Hsv, container: &Hsv, bright_blue: &Hsv) -> Result<Calcu
     let magh = {
         let default = base - 10.8;
         if default < 0.0 {
-            default * 360.0
+            default + 360.0
         } else {
             default
         }
