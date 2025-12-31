@@ -56,7 +56,7 @@ pub struct BackEnds {
 }
 
 pub trait ResultBackEnd {
-    fn generate(color: &Srgb<f32>, balance: &BalanceContrast) -> Result<BackEnds>;
+    fn generate(&self, color: &Srgb<f32>, balance: &BalanceContrast) -> Result<BackEnds>;
 }
 
 mod dms;
@@ -74,7 +74,7 @@ pub fn generate(
     };
 
     let ansi_srgb = match backend {
-        BackendEnum::Dms => dms::CalculatorDms::generate(color, balance_strag)?,
+        BackendEnum::Dms => dms::DMS.generate(color, balance_strag)?,
     };
 
     let ansi_srgb = match backend {

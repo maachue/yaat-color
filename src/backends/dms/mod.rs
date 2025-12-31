@@ -35,8 +35,6 @@ use super::Calculator;
 
 mod calculator;
 
-pub type CalculatorDms = Calculator<Hsv>;
-
 fn derive_container(color: &Hsv) -> Hsv {
     Hsv::new(
         color.hue,
@@ -45,33 +43,34 @@ fn derive_container(color: &Hsv) -> Hsv {
     )
 }
 
-impl CalculatorDms {
-    fn get(color: &Hsv, container: &Hsv) -> Result<Self> {
-        let bright_blue = retone_to_l(color, 85.0);
+fn get(color: &Hsv, container: &Hsv) -> Result<Calculator<Hsv>> {
+    let bright_blue = retone_to_l(color, 85.0);
 
-        let hues = calculator::get_hues(color, container, &bright_blue)?;
-        let saturations = calculator::get_saturation(color, container, &bright_blue)?;
-        let values = calculator::get_value(color, container, &bright_blue)?;
+    let hues = calculator::get_hues(color, container, &bright_blue)?;
+    let saturations = calculator::get_saturation(color, container, &bright_blue)?;
+    let values = calculator::get_value(color, container, &bright_blue)?;
 
-        Ok(Self {
-            normal: std::array::from_fn(|i| {
-                Hsv::new(hues.normal[i], saturations.normal[i], values.normal[i])
-            }),
-            bright: std::array::from_fn(|i| {
-                Hsv::new(hues.bright[i], saturations.bright[i], values.bright[i])
-            }),
-        })
+    Ok(Calculator::<Hsv> {
+        normal: std::array::from_fn(|i| {
+            Hsv::new(hues.normal[i], saturations.normal[i], values.normal[i])
+        }),
+        bright: std::array::from_fn(|i| {
+            Hsv::new(hues.bright[i], saturations.bright[i], values.bright[i])
+        }),
+    })
     }
-}
 
-impl ResultBackEnd for CalculatorDms {
+pub struct Dms;
+
+impl ResultBackEnd for Dms {
     fn generate(
+        &self,
         color: &palette::Srgb<f32>,
         balance: &super::BalanceContrast,
     ) -> Result<super::BackEnds> {
         let color = color.to_hsv();
         let container = derive_container(&color);
-        let ansi = Self::get(&color, &container)?;
+        let ansi = get(&color, &container)?;
 
         let (normal_target, bright_target) = match balance {
             super::BalanceContrast::Dps => (Some(40.0), Some(35.0)),
@@ -93,3 +92,4 @@ impl ResultBackEnd for CalculatorDms {
 }
 
 pub mod balance;
+pub const DMS: Dms = Dms;
