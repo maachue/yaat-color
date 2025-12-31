@@ -2,7 +2,7 @@
 
 ## Notice
 
-This module is based on the **DMS color algorithm**
+This module is based on the **generator**
 originally implemented by **DankMaterialShell**.
 
 Original algorithm  
