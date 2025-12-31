@@ -32,16 +32,19 @@ fn main() -> Result<()> {
         eprintln!("{}: `--apply` flag hasn't support windows yet.", WARN_MSG)
     }
 
-    if let Some(stdin) = read_stdin() {
-        cmd.color = Some(stdin); // NOTE: more safety by using `.trim()`. It will remove `\n`
+    if cmd.color.is_none()
+        && let Some(stdin) = read_stdin()
+    {
+        cmd.color = Some(stdin)
     }
 
     if !cmd.quiet {
         eprintln!(
-            "{} ANSI palette with `{}` backend and {} mode",
+            "{} ANSI palette with `{}` backend, {} mode, with input {:?}",
             DOING_WORK_MSG.style("   Calculating"),
             cmd.backend,
-            cmd.mode
+            cmd.mode,
+            cmd.color,
         );
     }
 
