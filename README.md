@@ -1,7 +1,7 @@
 <div align="center">
     <h1>yaat-color</h1>
-    <em>A part of Yet Another Automation Tool</em>
-    <em>for ANSI palette generator</em>
+    <em>A part of Yet Another Automation Tool</em></br>
+    <em> — ANSI palette generator — </em>
 <br/> <!-- badges here -->
 <br/>
 A ANSI palette generator with simple input.
