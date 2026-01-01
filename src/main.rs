@@ -76,9 +76,9 @@ fn main() -> Result<()> {
 
                 let (r, g, b) = match rgb.as_slice() {
                     [first, second, third] => (
-                        first.parse::<f32>()?,
-                        second.parse::<f32>()?,
-                        third.parse::<f32>()?,
+                        first.parse::<u8>()?,
+                        second.parse::<u8>()?,
+                        third.parse::<u8>()?,
                     ),
                     _ => bail!("Rgb value is incorrect!"),
                 };
