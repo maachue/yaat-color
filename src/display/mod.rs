@@ -1,4 +1,4 @@
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use clap::ValueEnum;
 use owo_colors::OwoColorize;
 use palette::Srgb;

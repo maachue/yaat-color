@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use clap::ValueEnum;
 use palette::Srgb;
 

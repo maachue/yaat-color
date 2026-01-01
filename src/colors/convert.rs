@@ -1,4 +1,4 @@
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use palette::{Clamp, Hsv, IntoColor, Lab, Lch, Oklch, Srgb};
 use std::str::FromStr;
 

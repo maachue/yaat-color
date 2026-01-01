@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use anyhow::{Result, bail};
+use color_eyre::eyre::{Result, bail};
 use clap::Parser;
 use owo_colors::OwoColorize;
 use palette::Srgb;
@@ -9,7 +9,7 @@ use crate::{
     cli::Mode,
     colors::convert::FromHexToSrgbf32,
     display::DumpMode,
-    utils::{DOING_WORK_MSG, ERR_MSG, WARN_MSG, read_stdin},
+    utils::{DOING_WORK_MSG, WARN_MSG, read_stdin},
 };
 
 mod colors;
@@ -22,8 +22,9 @@ mod term;
 
 mod backends;
 
-// TODO: better erorr msg
 fn main() -> Result<()> {
+    color_eyre::install()?;
+
     let mut cmd = cli::Cli::parse();
 
     if cmd.json_dump {
@@ -47,8 +48,9 @@ fn main() -> Result<()> {
         && v.is_empty()
     {
         bail!(
-            "{ERR_MSG}: Something went wrong. {} is empty!",
-            "<COLOR>".green()
+            "Something went wrong. {} {}",
+            "<COLOR>".green(),
+            "is empty!".bright_red(),
         )
     }
 
@@ -61,7 +63,7 @@ fn main() -> Result<()> {
             match cmd.color.as_deref() {
                 Some(v) => v,
                 None => bail!(
-                    "{ERR_MSG}: the following required arguments were not provided:\n  {}",
+                    "The following required arguments were not provided:\n  {}",
                     "<COLOR>".green()
                 ),
             },
@@ -97,7 +99,7 @@ fn main() -> Result<()> {
             }
         }
         None => bail!(
-            "{ERR_MSG}: the following required arguments were not provided:\n  {}",
+            "The following required arguments were not provided:\n  {}",
             "<COLOR>".green()
         ),
     };
