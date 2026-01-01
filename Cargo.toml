@@ -24,5 +24,4 @@ config = ["dep:directories"]
 [profile.release]
 lto = true
 opt-level = 3
-incremental = true
-
+incremental = false
