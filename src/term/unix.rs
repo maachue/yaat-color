@@ -1,6 +1,6 @@
 use std::{fs::File, io::Write};
 
-use anyhow::Result;
+use color_eyre::eyre::{Result, bail};
 use palette::Srgb;
 
 use crate::{
@@ -65,9 +65,8 @@ pub fn unix_term(ansi: &AnsiPaletteHex) -> Result<()> {
                     continue;
                 }
             }
-            Err(e) => anyhow::bail!("Error while sending sequences to terminals:\n{e}"),
+            Err(e) => bail!("Error while sending sequences to terminals:\n{e}"),
         }
     }
     Ok(())
 }
-

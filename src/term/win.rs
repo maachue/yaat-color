@@ -1,6 +1,6 @@
 use std::{env, fs::File, io::Write, path::PathBuf};
 
-use anyhow::Result;
+use color_eyre::eyre::{Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -31,7 +31,7 @@ fn get_winterm_dirs() -> Option<(PathBuf, PathBuf, PathBuf)> {
 
 pub fn win_term(ansi: &AnsiPaletteHex) -> Result<()> {
     let Some((stable, preview, unpkg)) = get_winterm_dirs() else {
-        anyhow::bail!("couldn't get %LOCALAPPDATA%")
+        bail!("couldn't get %LOCALAPPDATA%")
     };
 
     for i in [stable, preview, unpkg] {
@@ -155,4 +155,3 @@ impl From<&AnsiPaletteHex> for WinScheme {
         }
     }
 }
-
