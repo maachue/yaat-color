@@ -6,7 +6,7 @@ pub const WARN_MSG: Styled<&'static str> = Style::new().yellow().bold().style("w
 pub const DOING_WORK_MSG: Style = Style::new().bright_green().bold();
 // pub const ERR_MSG: Styled<&'static str> = Style::new().red().bold().style("error");
 #[allow(dead_code)]
-pub const NOTE_MSG: Styled<&'static str> = Style::new().bold().green().style("note");
+pub const NOTE_MSG: Styled<&'static str> = Style::new().bright_cyan().bold().style("note");
 
 pub fn format_duration(d: Duration) -> String {
     match d {

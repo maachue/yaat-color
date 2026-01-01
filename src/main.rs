@@ -1,7 +1,7 @@
 use std::time::Instant;
 
-use color_eyre::eyre::{Result, bail};
 use clap::Parser;
+use color_eyre::eyre::{Result, bail};
 use owo_colors::OwoColorize;
 use palette::Srgb;
 
@@ -9,7 +9,7 @@ use crate::{
     cli::Mode,
     colors::convert::FromHexToSrgbf32,
     display::DumpMode,
-    utils::{DOING_WORK_MSG, WARN_MSG, read_stdin},
+    utils::{DOING_WORK_MSG, NOTE_MSG, WARN_MSG, read_stdin},
 };
 
 mod colors;
@@ -22,6 +22,7 @@ mod term;
 
 mod backends;
 
+// TODO: refactor this
 fn main() -> Result<()> {
     color_eyre::install()?;
 
@@ -41,6 +42,10 @@ fn main() -> Result<()> {
     if cmd.color.is_none()
         && let Some(stdin) = read_stdin()
     {
+        if !cmd.quiet {
+            eprintln!("{NOTE_MSG}: found pipeline! Value is: {stdin}")
+        }
+
         cmd.color = Some(stdin)
     }
 
