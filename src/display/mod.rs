@@ -1,5 +1,5 @@
-use color_eyre::eyre::Result;
 use clap::ValueEnum;
+use color_eyre::eyre::Result;
 use owo_colors::OwoColorize;
 use palette::Srgb;
 
@@ -8,6 +8,7 @@ use crate::{
         convert::{ColorExt, FromHexToSrgbf32},
         unified::AnsiPaletteHex,
     },
+    display::template::Viewer,
     utils::DOING_WORK_MSG,
 };
 
@@ -49,7 +50,7 @@ pub fn json_dump_pretty(ansi: &AnsiPaletteHex) -> Result<()> {
     use template::FreshJson;
 
     let json = FreshJson {
-        yaat: ansi.read_as_viewer_json_struct(),
+        yaat: ansi.viewer_json_pretty(),
     };
 
     println!("{}", serde_json::to_string_pretty(&json)?);

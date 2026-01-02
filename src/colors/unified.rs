@@ -53,18 +53,19 @@ impl<T: Clone> AnsiPalette<T> {
             .map(|(i, c)| (i as u8, c))
             .collect()
     }
-    pub fn read_as_viewer_json_struct(&self) -> ViewerAsIndexMapAnsiPalette<'_, T> {
+    /// deprecated
+    pub fn _read_as_viewer_json_struct(&self) -> ViewerAsIndexMapAnsiPalette<T> {
         let normal = self
             .normal
             .iter()
             .enumerate()
-            .map(|(i, c)| (i.to_string(), c))
+            .map(|(i, c)| (i.to_string(), c.clone()))
             .collect();
         let bright = self
             .bright
             .iter()
             .enumerate()
-            .map(|(i, c)| (i.to_string(), c))
+            .map(|(i, c)| (i.to_string(), c.clone()))
             .collect();
 
         ViewerAsIndexMapAnsiPalette { normal, bright }
@@ -79,10 +80,11 @@ impl<T> Index<usize> for BasedAnsi<T> {
     }
 }
 
+// NOTE: refactor?
 #[derive(Serialize)]
-pub struct ViewerAsIndexMapAnsiPalette<'a, T> {
-    pub normal: IndexMap<String, &'a T>,
-    pub bright: IndexMap<String, &'a T>,
+pub struct ViewerAsIndexMapAnsiPalette<T> {
+    pub normal: IndexMap<String, T>,
+    pub bright: IndexMap<String, T>,
 }
 
 pub type AnsiPaletteHex = AnsiPalette<String>;

@@ -84,7 +84,7 @@ fn main() -> Result<()> {
                 };
                 Srgb::new(r, g, b).into_format()
             } else {
-                Srgb::from_hex(&color)?.into_format()
+                Srgb::from_hex(color)?.into_format()
             }
         }
         None => bail!(
