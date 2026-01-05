@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use color_eyre::eyre::{Context, Result};
 use palette::{Clamp, Hsv, IntoColor, Lab, Lch, Oklch, Srgb};
 use std::str::FromStr;
 
@@ -75,6 +75,13 @@ pub trait FromHexToSrgbf32 {
 
 impl FromHexToSrgbf32 for Srgb {
     fn from_hex(hex: &str) -> Result<Srgb<f32>> {
-        Ok(Srgb::from_str(hex)?.into_format())
+        Ok(Srgb::from_str(hex)
+            .with_context(|| {
+                format!(
+                    "input '{}' invalid! Please use a value between 0 and F and format below.",
+                    hex
+                )
+            })?
+            .into_format())
     }
 }
